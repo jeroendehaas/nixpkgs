@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, perlPackages, flex, makeWrapper, glibcLocales }:
+{ stdenv, fetchurl, perlPackages, coreutils, flex, glibcLocales, makeWrapper }:
 
 perlPackages.buildPerlPackage rec {
   pname = "sloccount";
@@ -22,11 +22,12 @@ perlPackages.buildPerlPackage rec {
 
   preInstall = "mkdir -p $out/bin";
 
+  # coreutils is needed for wc
   postInstall = ''
     mv $out/bin $out/libexec
 
     makeWrapper $out/libexec/sloccount $out/bin/sloccount \
-      --prefix PATH : $out/libexec \
+      --prefix PATH : $out/libexec:${stdenv.lib.makeBinPath [ coreutils ]} \
       --set LOCALE_ARCHIVE ${glibcLocales}/lib/locale/locale-archive
   '';
 
